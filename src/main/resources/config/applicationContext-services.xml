@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+	<!-- Common Services -->
+
+	<bean id="textResourceService"
+		class="ch.kostceco.tools.kostconverter.service.impl.TextResourceServiceImpl">
+	</bean>
+
+	<bean id="configurationService"
+		class="ch.kostceco.tools.kostconverter.service.impl.ConfigurationServiceImpl">
+		<property name="textResourceService" ref="textResourceService" />
+	</bean>
+
+	<bean id="messageService"
+		class="ch.kostceco.tools.kostconverter.service.impl.MessageServiceImpl">
+	</bean>
+
+	<!-- Validation Services -->
+	<bean id="pdfaProcess1ValidationErkModule" class="ch.kostceco.tools.kostconverter.process.modulepdfa.impl.PdfaProcess1ValidationErkModuleImpl">
+		<property name="textResourceService" ref="textResourceService" />
+		<property name="messageService" ref="messageService" />
+		<property name="configurationService" ref="configurationService" />
+	</bean>
+	<bean id="pdfaProcess1ValidationValModule" class="ch.kostceco.tools.kostconverter.process.modulepdfa.impl.PdfaProcess1ValidationValModuleImpl">
+		<property name="textResourceService" ref="textResourceService" />
+		<property name="messageService" ref="messageService" />
+		<property name="configurationService" ref="configurationService" />
+	</bean>
+	<bean id="pdfaProcess3ConversionModule" class="ch.kostceco.tools.kostconverter.process.modulepdfa.impl.PdfaProcess3ConversionModuleImpl">
+		<property name="textResourceService" ref="textResourceService" />
+		<property name="messageService" ref="messageService" />
+		<property name="configurationService" ref="configurationService" />
+	</bean>
+	<bean id="pdfaProcess4RevalidationModule" class="ch.kostceco.tools.kostconverter.process.modulepdfa.impl.PdfaProcess4RevalidationModuleImpl">
+		<property name="textResourceService" ref="textResourceService" />
+		<property name="messageService" ref="messageService" />
+		<property name="configurationService" ref="configurationService" />
+	</bean>
+	<bean id="pdfaProcess5AppearanceModule" class="ch.kostceco.tools.kostconverter.process.modulepdfa.impl.PdfaProcess5AppearanceModuleImpl">
+		<property name="textResourceService" ref="textResourceService" />
+		<property name="messageService" ref="messageService" />
+		<property name="configurationService" ref="configurationService" />
+	</bean>
+
+	<bean id="controllerpdfa" class="ch.kostceco.tools.kostconverter.controller.Controllerpdfa">
+		<property name="textResourceService" ref="textResourceService" />
+		<property name="pdfaProcess1ValidationErkModule" ref="pdfaProcess1ValidationErkModule" />
+		<property name="pdfaProcess1ValidationValModule" ref="pdfaProcess1ValidationValModule" />
+		<property name="pdfaProcess3ConversionModule" ref="pdfaProcess3ConversionModule" />
+		<property name="pdfaProcess4RevalidationModule" ref="pdfaProcess4RevalidationModule" />
+		<property name="pdfaProcess5AppearanceModule" ref="pdfaProcess5AppearanceModule" />
+	</bean>
+	
+	<bean id="kostconverter" class="ch.kostceco.tools.kostconverter.KOSTConverter">
+		<property name="textResourceService" ref="textResourceService" />
+		<property name="configurationService" ref="configurationService" />
+	</bean>
+
+	<bean id="logconfigurator" class="ch.kostceco.tools.kostconverter.logging.LogConfigurator">
+		<property name="textResourceService" ref="textResourceService" />
+	</bean>
+
+</beans>

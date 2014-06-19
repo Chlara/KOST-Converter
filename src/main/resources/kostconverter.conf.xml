@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<configuration>
+	<pathtologfile>logs</pathtologfile>
+	<pathtoworkdir>temp_KOST-Converter</pathtoworkdir>
+	
+<pdfa>
+	<!--Pfad zum PDF/A-Manager von PDFTron (neuere Test-Version)-->	
+	<pathtopdfavalidator>C:\Software\pdfa\pdfa.exe</pathtopdfavalidator>
+	<!--Pfad zum PDF/A-Manager von PDFTron (alte Version)-->	
+	<pathtopdfaconverter>C:\Software\PDFTRON\pdfa\pdfa\pdfa.exe</pathtopdfaconverter>
+	<!--Pfad zum comparepdf-->	
+	<pathtopdfaappearance>C:\Software\comparepdf-1.0.0\comparepdf.exe</pathtopdfaappearance>
+	<!--Angeben welche Conformancelevel mindestens erreicht werden muss-->
+	<!--no verwenden wenn diese Version nicht erlaubt ist-->
+	<pdfa1>1B</pdfa1>	<!--1A / 1B / no-->
+	<pdfa2>2B</pdfa2>	<!--2A / 2B / 2U / no-->
+</pdfa>
+
+</configuration>
