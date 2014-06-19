@@ -1,15 +1,12 @@
 /*== KOST-Converter ==================================================================================
-The KOST-Converter application is used for validate TIFF, SIARD, PDF/A-Files and Submission 
-Information Package (SIP). 
-Copyright (C) 2012-2014 Claire Röthlisberger (KOST-CECO), Christian Eugster, Olivier Debenath, 
-Peter Schneider (Staatsarchiv Aargau), Daniel Ludin (BEDAG AG)
+The KOST-Converter application is used for convert PDF-Files to PDF/A-Files including 
+validation and a automatic visual check. 
+Copyright (C) 2014 Claire Röthlisberger (KOST-CECO)
 -----------------------------------------------------------------------------------------------
 KOST-Converter is a development of the KOST-CECO. All rights rest with the KOST-CECO. 
 This application is free software: you can redistribute it and/or modify it under the 
 terms of the GNU General Public License as published by the Free Software Foundation, 
 either version 3 of the License, or (at your option) any later version. 
-BEDAG AG and Daniel Ludin hereby disclaims all copyright interest in the program 
-SIP-Val v0.2.0 written by Daniel Ludin (BEDAG AG). Switzerland, 1 March 2011.
 This application is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
 without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 See the follow GNU General Public License for more details.
@@ -33,10 +30,7 @@ import ch.kostceco.tools.kostconverter.util.StreamGobbler;
 import ch.kostceco.tools.kostconverter.util.Util;
 
 /**
- * PDFA Validierungs mit PDFTron. Ist die vorliegende PDF-Datei eine valide
- * PDFA-Datei oder nicht?
- * 
- * Invalide PDF/A-Dateien werden in den ff Modulen konvertiert
+ * Stimmt die Konvertierte Datei optisch mit dem Original überein?
  * 
  * @author Rc Claire Röthlisberger, KOST-CECO
  */
@@ -159,9 +153,8 @@ public class PdfaProcess5AppearanceModuleImpl extends ValidationModuleImpl
 					// System.out.println( outputComparepdf );
 
 					/*
-					 * InputStream (Output): 
-					 * Files look different. 
-					 * No differences detected.
+					 * InputStream (Output): Files look different. No
+					 * differences detected.
 					 */
 
 					String outputIo = "No differences detected.";

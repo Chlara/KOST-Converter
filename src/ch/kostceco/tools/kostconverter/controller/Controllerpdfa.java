@@ -1,15 +1,12 @@
 /*== KOST-Converter ==================================================================================
-The KOST-Converter application is used for validate TIFF, SIARD, PDF/A-Files and Submission 
-Information Package (SIP). 
-Copyright (C) 2012-2014 Claire Röthlisberger (KOST-CECO), Christian Eugster, Olivier Debenath, 
-Peter Schneider (Staatsarchiv Aargau), Daniel Ludin (BEDAG AG)
+The KOST-Converter application is used for convert PDF-Files to PDF/A-Files including 
+validation and a automatic visual check. 
+Copyright (C) 2014 Claire Röthlisberger (KOST-CECO)
 -----------------------------------------------------------------------------------------------
 KOST-Converter is a development of the KOST-CECO. All rights rest with the KOST-CECO. 
 This application is free software: you can redistribute it and/or modify it under the 
 terms of the GNU General Public License as published by the Free Software Foundation, 
 either version 3 of the License, or (at your option) any later version. 
-BEDAG AG and Daniel Ludin hereby disclaims all copyright interest in the program 
-SIP-Val v0.2.0 written by Daniel Ludin (BEDAG AG). Switzerland, 1 March 2011.
 This application is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
 without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 See the follow GNU General Public License for more details.
@@ -24,23 +21,24 @@ import java.io.File;
 
 import ch.kostceco.tools.kostconverter.exception.modulepdfa.PdfaProcess1ValidationErkException;
 import ch.kostceco.tools.kostconverter.exception.modulepdfa.PdfaProcess1ValidationValException;
-import ch.kostceco.tools.kostconverter.exception.modulepdfa.PdfaProcess3ConversionException;
-import ch.kostceco.tools.kostconverter.exception.modulepdfa.PdfaProcess4RevalidationException;
+import ch.kostceco.tools.kostconverter.exception.modulepdfa.PdfaProcess2ConversionException;
+import ch.kostceco.tools.kostconverter.exception.modulepdfa.PdfaProcess3RevalidationException;
+import ch.kostceco.tools.kostconverter.exception.modulepdfa.PdfaProcess4ReconversionException;
 import ch.kostceco.tools.kostconverter.exception.modulepdfa.PdfaProcess5AppearanceException;
 import ch.kostceco.tools.kostconverter.logging.Logger;
 import ch.kostceco.tools.kostconverter.logging.MessageConstants;
 import ch.kostceco.tools.kostconverter.process.modulepdfa.PdfaProcess1ValidationErkModule;
 import ch.kostceco.tools.kostconverter.process.modulepdfa.PdfaProcess1ValidationValModule;
-import ch.kostceco.tools.kostconverter.process.modulepdfa.PdfaProcess3ConversionModule;
-import ch.kostceco.tools.kostconverter.process.modulepdfa.PdfaProcess4RevalidationModule;
+import ch.kostceco.tools.kostconverter.process.modulepdfa.PdfaProcess2ConversionModule;
+import ch.kostceco.tools.kostconverter.process.modulepdfa.PdfaProcess3RevalidationModule;
+import ch.kostceco.tools.kostconverter.process.modulepdfa.PdfaProcess4ReconversionModule;
 import ch.kostceco.tools.kostconverter.process.modulepdfa.PdfaProcess5AppearanceModule;
 import ch.kostceco.tools.kostconverter.service.TextResourceService;
 
 /**
- * KOSTConverter -->
+ * KOST-Converter -->
  * 
- * Der Controller ruft die benötigten Module zur Validierung der SIARD-Datei in
- * der benötigten Reihenfolge auf.
+ * Der Controller ruft die benötigten Module in der benötigten Reihenfolge auf.
  * 
  * Die Validierungs-Module werden mittels Spring-Dependency-Injection
  * eingebunden.
@@ -55,8 +53,9 @@ public class Controllerpdfa implements MessageConstants
 
 	private PdfaProcess1ValidationErkModule	pdfaProcess1ValidationErkModule;
 	private PdfaProcess1ValidationValModule	pdfaProcess1ValidationValModule;
-	private PdfaProcess3ConversionModule	pdfaProcess3ConversionModule;
-	private PdfaProcess4RevalidationModule	pdfaProcess4RevalidationModule;
+	private PdfaProcess2ConversionModule	pdfaProcess2ConversionModule;
+	private PdfaProcess3RevalidationModule	pdfaProcess3RevalidationModule;
+	private PdfaProcess4ReconversionModule	pdfaProcess4ReconversionModule;
 	private PdfaProcess5AppearanceModule	pdfaProcess5AppearanceModule;
 
 	public PdfaProcess1ValidationErkModule getPdfaProcess1ValidationErkModule()
@@ -81,26 +80,37 @@ public class Controllerpdfa implements MessageConstants
 		this.pdfaProcess1ValidationValModule = pdfaProcess1ValidationValModule;
 	}
 
-	public PdfaProcess3ConversionModule getPdfaProcess3ConversionModule()
+	public PdfaProcess2ConversionModule getPdfaProcess2ConversionModule()
 	{
-		return pdfaProcess3ConversionModule;
+		return pdfaProcess2ConversionModule;
 	}
 
-	public void setPdfaProcess3ConversionModule(
-			PdfaProcess3ConversionModule pdfaProcess3ConversionModule )
+	public void setPdfaProcess2ConversionModule(
+			PdfaProcess2ConversionModule pdfaProcess2ConversionModule )
 	{
-		this.pdfaProcess3ConversionModule = pdfaProcess3ConversionModule;
+		this.pdfaProcess2ConversionModule = pdfaProcess2ConversionModule;
 	}
 
-	public PdfaProcess4RevalidationModule getPdfaProcess4RevalidationModule()
+	public PdfaProcess3RevalidationModule getPdfaProcess3RevalidationModule()
 	{
-		return pdfaProcess4RevalidationModule;
+		return pdfaProcess3RevalidationModule;
 	}
 
-	public void setPdfaProcess4RevalidationModule(
-			PdfaProcess4RevalidationModule pdfaProcess4RevalidationModule )
+	public void setPdfaProcess3RevalidationModule(
+			PdfaProcess3RevalidationModule pdfaProcess3RevalidationModule )
 	{
-		this.pdfaProcess4RevalidationModule = pdfaProcess4RevalidationModule;
+		this.pdfaProcess3RevalidationModule = pdfaProcess3RevalidationModule;
+	}
+
+	public PdfaProcess4ReconversionModule getPdfaProcess4ReconversionModule()
+	{
+		return pdfaProcess4ReconversionModule;
+	}
+
+	public void setPdfaProcess4ReconversionModule(
+			PdfaProcess4ReconversionModule pdfaProcess4ReconversionModule )
+	{
+		this.pdfaProcess4ReconversionModule = pdfaProcess4ReconversionModule;
 	}
 
 	public void setPdfaProcess5AppearanceModule(
@@ -193,54 +203,79 @@ public class Controllerpdfa implements MessageConstants
 	public boolean executeProcess( File valDatei, File directoryOfLogfile )
 	{
 		boolean valid = true;
-		// 3 Conversion
+		// 2 Conversion
 		try {
-			if ( this.getPdfaProcess3ConversionModule().validate( valDatei,
+			if ( this.getPdfaProcess2ConversionModule().validate( valDatei,
 					directoryOfLogfile ) ) {
-				this.getPdfaProcess3ConversionModule().getMessageService()
+				this.getPdfaProcess2ConversionModule().getMessageService()
 						.print();
 			} else {
-				this.getPdfaProcess3ConversionModule().getMessageService()
+				this.getPdfaProcess2ConversionModule().getMessageService()
 						.print();
 				return false;
 			}
-		} catch ( PdfaProcess3ConversionException e ) {
+		} catch ( PdfaProcess2ConversionException e ) {
 			LOGGER.logError( getTextResourceService().getText(
-					MESSAGE_XML_MODUL_C_PDFA )
+					MESSAGE_XML_MODUL_B_PDFA )
 					+ getTextResourceService().getText( ERROR_XML_UNKNOWN,
 							e.getMessage() ) );
-			this.getPdfaProcess3ConversionModule().getMessageService().print();
+			this.getPdfaProcess2ConversionModule().getMessageService().print();
 			return false;
 		} catch ( Exception e ) {
 			LOGGER.logError( getTextResourceService().getText(
-					MESSAGE_XML_MODUL_C_PDFA )
+					MESSAGE_XML_MODUL_B_PDFA )
 					+ getTextResourceService().getText( ERROR_XML_UNKNOWN,
 							e.getMessage() ) );
 			return false;
 		}
 
-		// 4 Revalidation
+		// 3 Revalidation
 		try {
-			if ( this.getPdfaProcess4RevalidationModule().validate( valDatei,
+			if ( this.getPdfaProcess3RevalidationModule().validate( valDatei,
 					directoryOfLogfile ) ) {
-				this.getPdfaProcess4RevalidationModule().getMessageService()
+				this.getPdfaProcess3RevalidationModule().getMessageService()
 						.print();
 			} else {
-				this.getPdfaProcess4RevalidationModule().getMessageService()
+				this.getPdfaProcess3RevalidationModule().getMessageService()
 						.print();
-				return false;
+				// 4 Reconversion & Validation
+				try {
+					if ( this.getPdfaProcess4ReconversionModule().validate( valDatei,
+							directoryOfLogfile ) ) {
+						this.getPdfaProcess4ReconversionModule().getMessageService()
+								.print();
+					} else {
+						this.getPdfaProcess4ReconversionModule().getMessageService()
+								.print();
+						return false;
+					}
+				} catch ( PdfaProcess4ReconversionException e ) {
+					LOGGER.logError( getTextResourceService().getText(
+							MESSAGE_XML_MODUL_D_PDFA )
+							+ getTextResourceService().getText( ERROR_XML_UNKNOWN,
+									e.getMessage() ) );
+					this.getPdfaProcess3RevalidationModule().getMessageService()
+							.print();
+					return false;
+				} catch ( Exception e ) {
+					LOGGER.logError( getTextResourceService().getText(
+							MESSAGE_XML_MODUL_D_PDFA )
+							+ getTextResourceService().getText( ERROR_XML_UNKNOWN,
+									e.getMessage() ) );
+					return false;
+				}
 			}
-		} catch ( PdfaProcess4RevalidationException e ) {
+		} catch ( PdfaProcess3RevalidationException e ) {
 			LOGGER.logError( getTextResourceService().getText(
-					MESSAGE_XML_MODUL_D_PDFA )
+					MESSAGE_XML_MODUL_C_PDFA )
 					+ getTextResourceService().getText( ERROR_XML_UNKNOWN,
 							e.getMessage() ) );
-			this.getPdfaProcess4RevalidationModule().getMessageService()
+			this.getPdfaProcess3RevalidationModule().getMessageService()
 					.print();
 			return false;
 		} catch ( Exception e ) {
 			LOGGER.logError( getTextResourceService().getText(
-					MESSAGE_XML_MODUL_D_PDFA )
+					MESSAGE_XML_MODUL_C_PDFA )
 					+ getTextResourceService().getText( ERROR_XML_UNKNOWN,
 							e.getMessage() ) );
 			return false;

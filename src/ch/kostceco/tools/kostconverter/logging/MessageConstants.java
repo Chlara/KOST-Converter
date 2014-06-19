@@ -1,15 +1,12 @@
 /*== KOST-Converter ==================================================================================
-The KOST-Converter application is used for validate TIFF, SIARD, PDF/A-Files and Submission 
-Information Package (SIP). 
-Copyright (C) 2012-2014 Claire Röthlisberger (KOST-CECO), Christian Eugster, Olivier Debenath, 
-Peter Schneider (Staatsarchiv Aargau), Daniel Ludin (BEDAG AG)
+The KOST-Converter application is used for convert PDF-Files to PDF/A-Files including 
+validation and a automatic visual check. 
+Copyright (C) 2014 Claire Röthlisberger (KOST-CECO)
 -----------------------------------------------------------------------------------------------
 KOST-Converter is a development of the KOST-CECO. All rights rest with the KOST-CECO. 
 This application is free software: you can redistribute it and/or modify it under the 
 terms of the GNU General Public License as published by the Free Software Foundation, 
 either version 3 of the License, or (at your option) any later version. 
-BEDAG AG and Daniel Ludin hereby disclaims all copyright interest in the program 
-SIP-Val v0.2.0 written by Daniel Ludin (BEDAG AG). Switzerland, 1 March 2011.
 This application is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
 without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 See the follow GNU General Public License for more details.
@@ -96,12 +93,18 @@ public interface MessageConstants
 	String	ERROR_XML_A_PDFA_INVALID						= "error.xml.a.pdfa.invalid";
 	String	ERROR_XML_A_PDFA_ENCRYPTION						= "error.xml.a.pdfa.encryption";
 
+	// Modul B Meldungen
+	String	ERROR_XML_B_PDFA_CONVERTED						= "error.xml.b.pdfa.converted";
+
 	// Modul C Meldungen
-	String	ERROR_XML_C_PDFA_CONVERTED						= "error.xml.c.pdfa.converted";
+	String	ERROR_XML_C_PDFA_VALID							= "error.xml.c.pdfa.valid";
+	String	ERROR_XML_C_PDFA_INVALID						= "error.xml.c.pdfa.invalid";
 
 	// Modul D Meldungen
+	String	ERROR_XML_D_PDFA_CONVERTED						= "error.xml.d.pdfa.converted";
 	String	ERROR_XML_D_PDFA_VALID							= "error.xml.d.pdfa.valid";
 	String	ERROR_XML_D_PDFA_INVALID						= "error.xml.d.pdfa.invalid";
+	String	ERROR_XML_D_PDFA_NORECONVERSION						= "error.xml.d.pdfa.noreconversion";
 
 	// Modul E Meldungen
 	String	ERROR_XML_E_PDFA_EQUALS							= "error.xml.e.pdfa.equals";

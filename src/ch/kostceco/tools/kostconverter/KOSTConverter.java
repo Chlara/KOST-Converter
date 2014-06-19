@@ -1,5 +1,5 @@
 /*== KOST-Converter ==================================================================================
-The KOST-Converter v0.0.1 application is used for convert PDF-Files to PDF/A-Files including 
+The KOST-Converter v0.0.2 application is used for convert PDF-Files to PDF/A-Files including 
 validation and a automatic visual check. 
 Copyright (C) 2014 Claire Röthlisberger (KOST-CECO)
 -----------------------------------------------------------------------------------------------

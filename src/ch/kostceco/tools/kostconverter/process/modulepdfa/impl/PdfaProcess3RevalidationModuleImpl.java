@@ -1,15 +1,12 @@
 /*== KOST-Converter ==================================================================================
-The KOST-Converter application is used for validate TIFF, SIARD, PDF/A-Files and Submission 
-Information Package (SIP). 
-Copyright (C) 2012-2014 Claire Röthlisberger (KOST-CECO), Christian Eugster, Olivier Debenath, 
-Peter Schneider (Staatsarchiv Aargau), Daniel Ludin (BEDAG AG)
+The KOST-Converter application is used for convert PDF-Files to PDF/A-Files including 
+validation and a automatic visual check. 
+Copyright (C) 2014 Claire Röthlisberger (KOST-CECO)
 -----------------------------------------------------------------------------------------------
 KOST-Converter is a development of the KOST-CECO. All rights rest with the KOST-CECO. 
 This application is free software: you can redistribute it and/or modify it under the 
 terms of the GNU General Public License as published by the Free Software Foundation, 
 either version 3 of the License, or (at your option) any later version. 
-BEDAG AG and Daniel Ludin hereby disclaims all copyright interest in the program 
-SIP-Val v0.2.0 written by Daniel Ludin (BEDAG AG). Switzerland, 1 March 2011.
 This application is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
 without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 See the follow GNU General Public License for more details.
@@ -20,30 +17,39 @@ Boston, MA 02110-1301 USA or see <http://www.gnu.org/licenses/>.
 
 package ch.kostceco.tools.kostconverter.process.modulepdfa.impl;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
-import ch.kostceco.tools.kostconverter.exception.modulepdfa.PdfaProcess3ConversionException;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import ch.kostceco.tools.kostconverter.exception.SystemException;
+import ch.kostceco.tools.kostconverter.exception.modulepdfa.PdfaProcess3RevalidationException;
 import ch.kostceco.tools.kostconverter.process.ValidationModuleImpl;
-import ch.kostceco.tools.kostconverter.process.modulepdfa.PdfaProcess3ConversionModule;
+import ch.kostceco.tools.kostconverter.process.modulepdfa.PdfaProcess3RevalidationModule;
 import ch.kostceco.tools.kostconverter.service.ConfigurationService;
 import ch.kostceco.tools.kostconverter.util.StreamGobbler;
 import ch.kostceco.tools.kostconverter.util.Util;
 
 /**
- * PDFA Validierungs mit PDFTron. Ist die vorliegende PDF-Datei eine valide
+ * PDFA Revalidierungs mit PDFTron. Ist die konvertierte PDF-Datei eine valide
  * PDFA-Datei oder nicht?
- * 
- * Invalide PDF/A-Dateien werden in den ff Modulen konvertiert
  * 
  * @author Rc Claire Röthlisberger, KOST-CECO
  */
 
-public class PdfaProcess3ConversionModuleImpl extends ValidationModuleImpl
-		implements PdfaProcess3ConversionModule
+public class PdfaProcess3RevalidationModuleImpl extends ValidationModuleImpl
+		implements PdfaProcess3RevalidationModule
 {
 
 	private ConfigurationService	configurationService;
@@ -63,7 +69,7 @@ public class PdfaProcess3ConversionModuleImpl extends ValidationModuleImpl
 
 	@Override
 	public boolean validate( File valDatei, File directoryOfLogfile )
-			throws PdfaProcess3ConversionException
+			throws PdfaProcess3RevalidationException
 	{
 
 		@SuppressWarnings("unused")
@@ -74,7 +80,7 @@ public class PdfaProcess3ConversionModuleImpl extends ValidationModuleImpl
 		// überprüfen der Angaben: existiert die PdftronExe am
 		// angebenen Ort?
 		String pathToPdftronExe = getConfigurationService()
-				.getPathToPdfaConverter();
+				.getPathToPdfaValidator();
 		String pdfa1 = getConfigurationService().pdfa1();
 		String pdfa2 = getConfigurationService().pdfa2();
 
@@ -87,9 +93,18 @@ public class PdfaProcess3ConversionModuleImpl extends ValidationModuleImpl
 		 * entsprechenden Modul die property anzugeben: <property
 		 * name="configurationService" ref="configurationService" />
 		 */
-		
-		String pathToOutput = getConfigurationService()
-		.getPathToWorkDir();
+
+		String pathToOutput = getConfigurationService().getPathToWorkDir();
+
+		String pathValDatei = valDatei.getParent();
+		String pathToOutputNok = pathValDatei + "\\_convert_invalid";
+		File outputNok = new File( pathToOutputNok );
+		if ( !outputNok.exists() ) {
+			outputNok.mkdir();
+		}
+
+		String valDateiName = valDatei.getName();
+		valDatei = new File( pathToOutput, valDateiName );
 
 		pathToPdftronExe = "\"" + pathToPdftronExe + "\"";
 		/*
@@ -105,7 +120,6 @@ public class PdfaProcess3ConversionModuleImpl extends ValidationModuleImpl
 				|| pdfa2.equals( "2U" ) ) {
 			// gültiger Konfigurationseintrag und V2 erlaubt
 			pdfaVer2 = 2;
-			valid = true;
 		} else {
 			// v2 nicht erlaubt oder falscher eintrag
 			pdfa2 = "no";
@@ -114,17 +128,16 @@ public class PdfaProcess3ConversionModuleImpl extends ValidationModuleImpl
 				|| pdfa1.equals( "B" ) ) {
 			// gültiger Konfigurationseintrag und V1 erlaubt
 			pdfaVer1 = 1;
-			valid = true;
 		} else {
 			// v1 nicht erlaubt oder falscher eintrag
 			pdfa1 = "no";
 		}
 
-		valid = true;
 		// PDF-Datei an Pdftron übergeben
 		if ( valid = true ) {
 			try {
 				// Start PDFTRON direkt auszulösen
+				File report;
 				String level = "no";
 				// Richtiges Level definieren
 				if ( pdfaVer1 != 1 ) {
@@ -184,24 +197,19 @@ public class PdfaProcess3ConversionModuleImpl extends ValidationModuleImpl
 
 				// Pfad zum Programm Pdftron
 				File pdftronExe = new File( pathToPdftronExe );
-				File output = new File( pathToOutput );
-				if ( !output.exists() ) {
-					output.mkdir();
-				}
-
+				File output = directoryOfLogfile;
+				String pathToPdftronOutput = output.getAbsolutePath();
 				StringBuffer command = new StringBuffer( pdftronExe + " " );
-				command.append( "-x " );
-				command.append( "-o " );
+				command.append( "-l " + level );
+				command.append( " -o " );
 				command.append( "\"" );
 				command.append( output.getAbsolutePath() );
 				command.append( "\"" );
-				command.append( " --suffix " + "\"\" " );
-				command.append( "-l " + level + " " );
-				command.append( "-c --nr " );
+				command.append( " " );
 				command.append( "\"" );
 				command.append( valDatei.getAbsolutePath() );
 				command.append( "\"" );
-				
+
 				Process proc = null;
 				Runtime rt = null;
 
@@ -228,11 +236,29 @@ public class PdfaProcess3ConversionModuleImpl extends ValidationModuleImpl
 
 					// Warte, bis wget fertig ist
 					proc.waitFor();
-					
+
 					Util.switchOnConsole();
-					
-					String valDateiName = valDatei.getName();
-					valDatei = new File( pathToOutput, valDateiName );
+
+					// Der Name des generierten Reports lautet per default
+					// report.xml und es scheint keine
+					// Möglichkeit zu geben, dies zu übersteuern.
+					report = new File( pathToPdftronOutput, "report.xml" );
+					File newReport = new File( pathToPdftronOutput,
+							valDatei.getName() + ".pdftron-reval-log.xml" );
+
+					// falls das File bereits existiert, z.B. von einem
+					// vorhergehenden Durchlauf, löschen wir es
+					if ( newReport.exists() ) {
+						newReport.delete();
+					}
+
+					boolean renameOk = report.renameTo( newReport );
+					if ( !renameOk ) {
+						throw new SystemException(
+								"Der Report konnte nicht umbenannt werden." );
+					}
+					report = newReport;
+
 				} catch ( Exception e ) {
 					getMessageService().logError(
 							getTextResourceService().getText(
@@ -249,6 +275,73 @@ public class PdfaProcess3ConversionModuleImpl extends ValidationModuleImpl
 				}
 				// Ende PDFTRON direkt auszulösen
 
+				String pathToPdftronReport = report.getAbsolutePath();
+				BufferedInputStream bis = new BufferedInputStream(
+						new FileInputStream( pathToPdftronReport ) );
+				DocumentBuilderFactory dbf = DocumentBuilderFactory
+						.newInstance();
+				DocumentBuilder db = dbf.newDocumentBuilder();
+				Document doc = db.parse( bis );
+				doc.normalize();
+
+				Integer passCount = new Integer( 0 );
+				NodeList nodeLstI = doc.getElementsByTagName( "Pass" );
+
+				// Valide pdfa-Dokumente enthalten
+				// "<Validation> <Pass FileName..."
+				// Anzahl pass = anzahl Valider pdfa
+				for ( int s = 0; s < nodeLstI.getLength(); s++ ) {
+					passCount = passCount + 1;
+					// Valide PDFA-Datei
+					isValid = true;
+					getMessageService()
+							.logError(
+									getTextResourceService().getText(
+											MESSAGE_XML_MODUL_C_PDFA )
+											+ getTextResourceService().getText(
+													ERROR_XML_C_PDFA_VALID,
+													valDatei.getName(),
+													level ) );
+				}
+
+				if ( passCount == 0 ) {
+					// Invalide PDFA-Datei
+					isValid = false;
+					// Konvertierte Datei in output/nok verschieben
+					File ziel = new File( pathToOutputNok, valDatei.getName() );
+					Util.copyFile( valDatei, ziel );
+					Util.deleteFile( valDatei );
+					valDatei = ziel;
+					// Manuelle Nachbearbeitung nötig
+					getMessageService()
+							.logError(
+									getTextResourceService().getText(
+											MESSAGE_XML_MODUL_C_PDFA )
+											+ getTextResourceService().getText(
+													ERROR_XML_C_PDFA_INVALID,
+													valDatei.getName(),
+													level ) );
+
+					NodeList nodeLstE = doc.getElementsByTagName( "Error" );
+
+					// Valide pdfa-Dokumente enthalten
+					// "<Validation> <Pass FileName..."
+					// Anzahl pass = anzahl Valider pdfa
+					for ( int s = 0; s < nodeLstE.getLength(); s++ ) {
+						Node dateiNode = nodeLstE.item( s );
+						NamedNodeMap nodeMap = dateiNode.getAttributes();
+						Node errorNodeM = nodeMap.getNamedItem( "Message" );
+						String errorMessage = errorNodeM.getNodeValue();
+						getMessageService().logError(
+								getTextResourceService().getText(
+										MESSAGE_XML_MODUL_C_PDFA )
+										+ getTextResourceService().getText(
+												ERROR_XML_AJ_PDFA_ERRORMESSAGE,
+												errorMessage ) );
+
+					}
+
+				}
 			} catch ( Exception e ) {
 				getMessageService().logError(
 						getTextResourceService().getText(
@@ -258,21 +351,6 @@ public class PdfaProcess3ConversionModuleImpl extends ValidationModuleImpl
 				return false;
 			}
 		}
-		if ( !valDatei.exists() ) {
-			getMessageService().logError(
-					getTextResourceService().getText(
-							MESSAGE_XML_MODUL_C_PDFA )
-							+ getTextResourceService().getText(
-									ERROR_XML_PDFTRON_SERVICEFAILED ) );
-			return false;
-		} else {
-			getMessageService().logError(
-					getTextResourceService().getText(
-							MESSAGE_XML_MODUL_C_PDFA )
-							+ getTextResourceService().getText(
-									ERROR_XML_C_PDFA_CONVERTED ) );
-		}
-
 		return isValid;
 	}
 

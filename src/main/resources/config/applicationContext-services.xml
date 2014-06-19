@@ -34,12 +34,17 @@
 		<property name="messageService" ref="messageService" />
 		<property name="configurationService" ref="configurationService" />
 	</bean>
-	<bean id="pdfaProcess3ConversionModule" class="ch.kostceco.tools.kostconverter.process.modulepdfa.impl.PdfaProcess3ConversionModuleImpl">
+	<bean id="pdfaProcess2ConversionModule" class="ch.kostceco.tools.kostconverter.process.modulepdfa.impl.PdfaProcess2ConversionModuleImpl">
 		<property name="textResourceService" ref="textResourceService" />
 		<property name="messageService" ref="messageService" />
 		<property name="configurationService" ref="configurationService" />
 	</bean>
-	<bean id="pdfaProcess4RevalidationModule" class="ch.kostceco.tools.kostconverter.process.modulepdfa.impl.PdfaProcess4RevalidationModuleImpl">
+	<bean id="pdfaProcess3RevalidationModule" class="ch.kostceco.tools.kostconverter.process.modulepdfa.impl.PdfaProcess3RevalidationModuleImpl">
+		<property name="textResourceService" ref="textResourceService" />
+		<property name="messageService" ref="messageService" />
+		<property name="configurationService" ref="configurationService" />
+	</bean>
+	<bean id="pdfaProcess4ReconversionModule" class="ch.kostceco.tools.kostconverter.process.modulepdfa.impl.PdfaProcess4ReconversionModuleImpl">
 		<property name="textResourceService" ref="textResourceService" />
 		<property name="messageService" ref="messageService" />
 		<property name="configurationService" ref="configurationService" />
@@ -54,8 +59,9 @@
 		<property name="textResourceService" ref="textResourceService" />
 		<property name="pdfaProcess1ValidationErkModule" ref="pdfaProcess1ValidationErkModule" />
 		<property name="pdfaProcess1ValidationValModule" ref="pdfaProcess1ValidationValModule" />
-		<property name="pdfaProcess3ConversionModule" ref="pdfaProcess3ConversionModule" />
-		<property name="pdfaProcess4RevalidationModule" ref="pdfaProcess4RevalidationModule" />
+		<property name="pdfaProcess2ConversionModule" ref="pdfaProcess2ConversionModule" />
+		<property name="pdfaProcess3RevalidationModule" ref="pdfaProcess3RevalidationModule" />
+		<property name="pdfaProcess4ReconversionModule" ref="pdfaProcess4ReconversionModule" />
 		<property name="pdfaProcess5AppearanceModule" ref="pdfaProcess5AppearanceModule" />
 	</bean>
 	

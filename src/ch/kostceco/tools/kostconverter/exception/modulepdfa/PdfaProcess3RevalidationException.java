@@ -19,7 +19,7 @@ package ch.kostceco.tools.kostconverter.exception.modulepdfa;
 
 import ch.kostceco.tools.kostconverter.exception.KOSTConverterException;
 
-public class PdfaProcess1ValidationErkException extends KOSTConverterException
+public class PdfaProcess3RevalidationException extends KOSTConverterException
 {
 
 	/**
@@ -27,7 +27,7 @@ public class PdfaProcess1ValidationErkException extends KOSTConverterException
 	 */
 	private static final long	serialVersionUID	= -8816841335398903517L;
 
-	public PdfaProcess1ValidationErkException( String message )
+	public PdfaProcess3RevalidationException( String message )
 	{
 		super( message );
 	}
